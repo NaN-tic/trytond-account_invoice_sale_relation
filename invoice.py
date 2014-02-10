@@ -18,7 +18,7 @@ class Invoice():
         origins = {}
         for invoice in invoices:
             origins[invoice.id] = list(set(
-                    [l.sale for l in invoice.lines if l.sale]))
+                    [l.sale.id for l in invoice.lines if l.sale]))
         return origins
 
 
