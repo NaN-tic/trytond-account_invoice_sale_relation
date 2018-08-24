@@ -10,8 +10,7 @@ from sql.operators import Concat
 __all__ = ['Invoice', 'InvoiceLine']
 
 
-class Invoice():
-    __metaclass__ = PoolMeta
+class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
     sales = fields.Function(fields.Many2Many('sale.sale', None, None, 'Sales'),
         'get_sales')
@@ -106,8 +105,7 @@ class Invoice():
         return [('id', 'in', query)]
 
 
-class InvoiceLine():
-    __metaclass__ = PoolMeta
+class InvoiceLine(metaclass=PoolMeta):
     __name__ = 'account.invoice.line'
     sale = fields.Function(fields.Many2One('sale.sale', 'Sale'), 'get_sale')
     shipments = fields.Function(fields.One2Many('stock.shipment.out', None,
