@@ -2,8 +2,6 @@
 #copyright notices and license terms.
 from trytond.model import fields
 from trytond.pool import Pool, PoolMeta
-from trytond.pyson import Eval
-
 from sql import Cast
 from sql.operators import Concat
 
@@ -17,18 +15,11 @@ class Invoice():
         'get_sales')
     shipments = fields.Function(
         fields.Many2Many('stock.shipment.out', None, None,
-            'Customer Shipments',
-            states={
-                'invisible': Eval('type').in_(['in_invoice', 'in_credit_note',
-                    'out_credit_note']),
-                }), 'get_shipments', searcher='search_shipments')
+            'Customer Shipments'), 'get_shipments', searcher='search_shipments')
     shipment_returns = fields.Function(
         fields.Many2Many('stock.shipment.out.return', None, None,
-            'Customer Return Shipments',
-            states={
-                'invisible': Eval('type').in_(['in_invoice', 'in_credit_note',
-                    'out_invoice']),
-                }), 'get_shipment_returns', searcher='search_shipment_returns')
+            'Customer Return Shipments'),
+            'get_shipment_returns', searcher='search_shipment_returns')
 
     @classmethod
     def get_sales(cls, invoices, name):
