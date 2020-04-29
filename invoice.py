@@ -178,6 +178,6 @@ class InvoiceLine(metaclass=PoolMeta):
         return [('id', 'in', query)]
 
     def get_shipment_info(self, name):
-        info = ','.join([s.code for s in self.shipments] +
-            [s.code for s in self.shipment_returns])
+        info = ','.join([s.number for s in self.shipments] +
+            [s.number for s in self.shipment_returns])
         return info
