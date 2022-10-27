@@ -29,11 +29,11 @@ class Invoice(metaclass=PoolMeta):
         return origins
 
     def get_shipments(self, name):
-        return list(set([s.id for l in self.lines if l.shipments
+        return list(set([s for l in self.lines if l.shipments
                         for s in l.shipments]))
 
     def get_shipment_returns(self, name):
-        return list(set([s.id for l in self.lines if l.shipment_returns
+        return list(set([s for l in self.lines if l.shipment_returns
                         for s in l.shipment_returns]))
 
     @classmethod
