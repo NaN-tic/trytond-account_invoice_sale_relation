@@ -12,13 +12,13 @@ class Invoice(metaclass=PoolMeta):
     __name__ = 'account.invoice'
     sales = fields.Function(fields.Many2Many('sale.sale', None, None, 'Sales'),
         'get_sales')
-    shipments = fields.Function(
+    invoice_shipments = fields.Function(
         fields.Many2Many('stock.shipment.out', None, None,
-            'Customer Shipments'), 'get_shipments', searcher='search_shipments')
-    shipment_returns = fields.Function(
+            'Customer Shipments'), 'get_invoice_shipments', searcher='search_invoice_shipments')
+    invoice_shipment_returns = fields.Function(
         fields.Many2Many('stock.shipment.out.return', None, None,
             'Customer Return Shipments'),
-            'get_shipment_returns', searcher='search_shipment_returns')
+            'get_invoice_shipment_returns', searcher='search_invoice_shipment_returns')
 
     @classmethod
     def get_sales(cls, invoices, name):
@@ -28,16 +28,16 @@ class Invoice(metaclass=PoolMeta):
                     [l.sale.id for l in invoice.lines if l.sale]))
         return origins
 
-    def get_shipments(self, name):
+    def get_invoice_shipments(self, name):
         return list(set([s for l in self.lines if l.shipments
-                        for s in l.shipments]))
+                        for s in l.invoice_shipments]))
 
-    def get_shipment_returns(self, name):
-        return list(set([s for l in self.lines if l.shipment_returns
-                        for s in l.shipment_returns]))
+    def get_invoice_shipment_returns(self, name):
+        return list(set([s for l in self.lines if l.invoice_shipment_returns
+                        for s in l.invoice_shipment_returns]))
 
     @classmethod
-    def search_shipments(cls, name, clause):
+    def search_invoice_shipments(cls, name, clause):
         pool = Pool()
         InvoiceLine = pool.get('account.invoice.line')
         InvoiceLineStockMove = pool.get('account.invoice.line-stock.move')
@@ -63,10 +63,11 @@ class Invoice(metaclass=PoolMeta):
                     Cast(shipment.id, shipment_type)))
             .select(invoice_line.invoice,
                 where=condition))
+
         return [('id', 'in', query)]
 
     @classmethod
-    def search_shipment_returns(cls, name, clause):
+    def search_invoice_shipment_returns(cls, name, clause):
         pool = Pool()
         InvoiceLine = pool.get('account.invoice.line')
         InvoiceLineStockMove = pool.get('account.invoice.line-stock.move')
@@ -99,22 +100,22 @@ class Invoice(metaclass=PoolMeta):
 class InvoiceLine(metaclass=PoolMeta):
     __name__ = 'account.invoice.line'
     sale = fields.Function(fields.Many2One('sale.sale', 'Sale'), 'get_sale')
-    shipments = fields.Function(fields.One2Many('stock.shipment.out', None,
+    invoice_shipments = fields.Function(fields.One2Many('stock.shipment.out', None,
             'Customer Shipments'),
-        'get_shipments', searcher='search_shipments')
-    shipment_returns = fields.Function(
+        'get_invoice_shipments', searcher='search_invoice_shipments')
+    invoice_shipment_returns = fields.Function(
         fields.One2Many('stock.shipment.out.return', None,
             'Customer Return Shipments'),
-        'get_shipment_returns', searcher='search_shipment_returns')
-    shipment_info = fields.Function(fields.Char('Customer Shipment Info'),
-        'get_shipment_info')
+        'get_invoice_shipment_returns', searcher='search_invoice_shipment_returns')
+    invoice_shipment_info = fields.Function(fields.Char('Customer Shipment Info'),
+        'get_invoice_shipment_info')
 
     def get_sale(self, name):
         SaleLine = Pool().get('sale.line')
         if isinstance(self.origin, SaleLine):
             return self.origin.sale.id
 
-    def get_shipments_returns(model_name):
+    def get_invoice_shipments_returns(model_name):
         "Computes the returns or shipments"
         def method(self, name):
             Model = Pool().get(model_name)
@@ -125,11 +126,11 @@ class InvoiceLine(metaclass=PoolMeta):
             return list(shipments)
         return method
 
-    get_shipments = get_shipments_returns('stock.shipment.out')
-    get_shipment_returns = get_shipments_returns('stock.shipment.out.return')
+    get_invoice_shipments = get_invoice_shipments_returns('stock.shipment.out')
+    get_invoice_shipment_returns = get_invoice_shipments_returns('stock.shipment.out.return')
 
     @classmethod
-    def search_shipments(cls, name, clause):
+    def search_invoice_shipments(cls, name, clause):
         pool = Pool()
         InvoiceLineStockMove = pool.get('account.invoice.line-stock.move')
         StockMove = pool.get('stock.move')
@@ -153,7 +154,7 @@ class InvoiceLine(metaclass=PoolMeta):
         return [('id', 'in', query)]
 
     @classmethod
-    def search_shipment_returns(cls, name, clause):
+    def search_invoice_shipment_returns(cls, name, clause):
         pool = Pool()
         InvoiceLineStockMove = pool.get('account.invoice.line-stock.move')
         StockMove = pool.get('stock.move')
@@ -177,7 +178,7 @@ class InvoiceLine(metaclass=PoolMeta):
                 where=condition))
         return [('id', 'in', query)]
 
-    def get_shipment_info(self, name):
-        info = ','.join([s.number for s in self.shipments] +
-            [s.number for s in self.shipment_returns])
+    def get_invoice_shipment_info(self, name):
+        info = ','.join([s.number for s in self.invoice_shipments] +
+            [s.number for s in self.invoice_shipment_returns])
         return info
